@@ -11,6 +11,7 @@ apiClient.interceptors.response.use((response) => response, (error) => {
     if (error.response.data.message === "Unauthorized access!") {
         return alertService.show("Warning", error.response.data.message, "destructive");
     }
+    return error.response;
 })
 
 export default apiClient;

@@ -17,11 +17,6 @@ export type fieldDetail = {
     cutomRules?: object
 }
 
-type formSubmitProfile = {
-    Method: "PUT" | "POST" | "PATCH",
-    url: string
-}
-
 interface FormBuilderProps {
     fields: fieldDetail[],
     submitUrl?: string

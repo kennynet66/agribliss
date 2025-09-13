@@ -1,4 +1,4 @@
-type ShowAlertFn = (title: string, message: string, variant: "default" | "destructive") => void;
+type ShowAlertFn = (title: string, message: string, variant?: "default" | "destructive") => void;
 
 class AlertService {
     private showAlertFn: ShowAlertFn | null = null;
@@ -7,7 +7,7 @@ class AlertService {
         this.showAlertFn = fn;
     }
 
-    show(title: string, message: string, variant: "default" | "destructive") {
+    show(title: string, message: string, variant?: "default" | "destructive") {
         if(this.showAlertFn) {
             this.showAlertFn(title, message, variant);
         } else {

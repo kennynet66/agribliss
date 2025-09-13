@@ -1,6 +1,6 @@
 import { ICrop } from "@/Types/crop.types";
 
-export function formatDate(dateString: string): string {
+export function formatDate(dateString: Date): string {
     const date = new Date(dateString);
 
     const month = String(date.getMonth() + 1).padStart(2, "0");

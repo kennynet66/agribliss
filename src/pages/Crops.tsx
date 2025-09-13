@@ -9,17 +9,25 @@ import {
   Check
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import apiClient from "@/Utilities/api.Utility";
 import { formatDate, CropCounter } from "@/Globals/global";
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useForm } from "react-hook-form";
 import FormBuilder, { fieldDetail } from "@/components/Builder/form.Builder";
-import { ICrop } from "@/Types/crop.types";
+import {  ICrop } from "@/Types/crop.types";
+import { cropApi } from "@/apis/crops";
+import { alertService } from "@/Services/alert.Service";
 
 export default function Crops() {
-  const [crops, setCrops] = useState([]);
+  const [crops, setCrops] = useState<ICrop[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
   const form = useForm()
   const count = new CropCounter(crops);
+
+  async function getCrops() {
+    const response = await cropApi.getCrops();
+    setCrops(response.Crops)
+  }
+
   const newCropFields: fieldDetail[] = [
     {
       fieldLabel: "Crop name",
@@ -73,31 +81,26 @@ export default function Crops() {
     },
   ]
 
-  const getCrops = async () => {
-    try {
-      const crops = await apiClient.get("/crops/getcrops");
-      setCrops(crops.data.Crops)
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
   const handleCreateCrop = async(Crop:ICrop) => {
     try {
-      const response = await apiClient.post("/crops/createcrop", Crop);
-      if(response.data.success) {
-        return form.reset()
+      const response = await cropApi.createCrop(Crop)
+      if(!response.success) {
+        return alertService.show("Error", response.message, "destructive")
       }
-      console.log("Jackpot", response.data.message);
+      form.reset();
+      setIsOpen(false)
+      return alertService.show("Success!", response.message)
+
     } catch (error) {
-      console.log(error.response.data.message)
       throw Error(error)
+    } finally {
+      getCrops();
     }
   }
 
   useEffect(() => {
-    getCrops();
-  }, [])
+    getCrops()
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -106,21 +109,21 @@ export default function Crops() {
           <h1 className="text-3xl font-bold text-foreground">Crop Management</h1>
           <p className="text-muted-foreground">Monitor your crops' health, growth stages, and yields</p>
         </div>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button className="bg-gradient-primary hover:bg-primary/90">
-              <Plus className="h-4 w-4 mr-2" />
-              Add New Crop
-            </Button>
-          </DialogTrigger>
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogContent>
             <DialogTitle>
               <h1>Add New Crop</h1>
             </DialogTitle>
             <FormBuilder fields={newCropFields} buttonText={"Add New Crop"} onSubmit={(values: ICrop) => handleCreateCrop(values)} />
           </DialogContent>
+          <DialogClose />
         </Dialog>
       </div>
+
+      <Button className="bg-gradient-primary hover:bg-primary/90" onClick={() => setIsOpen(!isOpen)}>
+        <Plus className="h-4 w-4 mr-2" />
+        Add New Crop
+      </Button>
 
       {/* Crop Overview Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
