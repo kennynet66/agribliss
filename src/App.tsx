@@ -10,6 +10,7 @@ import Livestock from "./pages/Livestock";
 import Inventory from "./pages/Inventory";
 import Financial from "./pages/Financial";
 import NotFound from "./pages/NotFound";
+import GlobalAlert from "./Globals/GlobalToast";
 
 const queryClient = new QueryClient();
 
@@ -20,6 +21,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Layout>
+          <GlobalAlert />
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/crops" element={<Crops />} />

@@ -1,14 +1,16 @@
 import { BASE_URL } from "@/Constants/api.Constants";
+import { alertService } from "@/Services/alert.Service";
 import axios from "axios";
 
 const apiClient = axios.create({
     baseURL: BASE_URL
 });
 
-axios.interceptors.response.use((response) => response, (error) => {
-    console.log("Called")
+apiClient.interceptors.response.use((response) => response, (error) => {
     const response = { error }
-    console.log("Response in interceptor", error.response)
+    if (error.response.data.message === "Unauthorized access!") {
+        return alertService.show("Warning", error.response.data.message, "destructive");
+    }
 })
 
 export default apiClient;
