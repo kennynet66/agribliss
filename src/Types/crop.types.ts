@@ -7,3 +7,9 @@ export type ICrop = {
     expectedHarvestDate: Date
     areaUnit: string
 }
+
+export type CropGetApiResponse = {
+    Crops? :ICrop,
+    Message?: string,
+    Success: boolean
+}
