@@ -13,7 +13,7 @@ import { formatDate, CropCounter } from "@/Globals/global";
 import { Dialog, DialogClose, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useForm } from "react-hook-form";
 import FormBuilder, { fieldDetail } from "@/components/Builder/form.Builder";
-import {  ICrop } from "@/Types/crop.types";
+import { ICrop } from "@/Types/crop.types";
 import { cropApi } from "@/apis/crops";
 import { alertService } from "@/Services/alert.Service";
 
@@ -81,15 +81,15 @@ export default function Crops() {
     },
   ]
 
-  const handleCreateCrop = async(Crop:ICrop) => {
+  const handleCreateCrop = async (Crop: ICrop) => {
     try {
       const response = await cropApi.createCrop(Crop)
-      if(!response.success) {
-        return alertService.show("Error", response.message, "destructive")
+      if (!response.Success) {
+        return alertService.show("Error", response.Message, "destructive")
       }
       form.reset();
       setIsOpen(false)
-      return alertService.show("Success!", response.message)
+      return alertService.show("Success!", response.Message)
 
     } catch (error) {
       throw Error(error)
