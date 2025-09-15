@@ -1,3 +1,5 @@
+import { ApiResponse } from "./globaltypes"
+
 export type ICrop = {
     _id: string,
     name: string
@@ -10,13 +12,6 @@ export type ICrop = {
     irrigationStatus: string
 }
 
-export type CropGetApiResponse = {
-    Crops? :ICrop[],
-    Message?: string,
-    Success: boolean
-}
-
-export type CreateCropApiResponse = {
-    success: boolean;
-    message: string;
+export type CropGetApiResponse = ApiResponse & {
+    Crops?: ICrop[]
 }

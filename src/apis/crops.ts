@@ -1,11 +1,12 @@
-import { CreateCropApiResponse, CropGetApiResponse, ICrop } from "@/Types/crop.types";
+import { CropGetApiResponse, ICrop } from "@/Types/crop.types";
+import { ApiResponse } from "@/Types/globaltypes";
 import apiClient from "@/Utilities/api.Utility"
 
 export class CropApi {
     getCrops = async (): Promise<CropGetApiResponse> => {
         try {
             const response = await apiClient.get("/crops/getCrops");
-            return { Crops: response.data.Crops as ICrop[], Success: true };
+            return { Crops: response.data.Crops as ICrop[], Success: true, Message: response.data.message || "" };
         } catch (error) {
             return {
                 Success: false,
@@ -15,18 +16,18 @@ export class CropApi {
         }
     }
 
-    createCrop = async (Crop: ICrop): Promise<CreateCropApiResponse> => {
+    createCrop = async (Crop: ICrop): Promise<ApiResponse> => {
         try {
             const response = await apiClient.post("/crops/createcrop", Crop);
             return {
-                success: response.data.success,
-                message: response.data.message,
+                Success: response.data.success,
+                Message: response.data.message,
             }
         } catch (error) {
             console.log(error);
             return {
-                success: error.data.success,
-                message: error.data.message,
+                Success: error.data.success,
+                Message: error.data.message,
             }
         }
     }
