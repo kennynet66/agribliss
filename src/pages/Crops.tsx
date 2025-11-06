@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { formatDate, CropCounter } from "@/Globals/global";
-import { Dialog, DialogClose, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useForm } from "react-hook-form";
 import FormBuilder, { fieldDetail } from "@/components/Builder/form.Builder";
 import { ICrop } from "@/Types/crop.types";
@@ -22,6 +22,7 @@ export default function Crops() {
   const [isOpen, setIsOpen] = useState(false);
   const form = useForm()
   const count = new CropCounter(crops);
+  const unitHolder: [{ label: string, value: string }] = [{ label: "fghgf", value: "ghgf" }];
 
   async function getCrops() {
     const response = await cropApi.getCrops();
@@ -33,51 +34,58 @@ export default function Crops() {
       fieldLabel: "Crop name",
       fieldName: "name",
       fieldPlaceHolder: "Enter crop name",
+      required: true
     },
     {
       fieldLabel: "Crop variety",
       fieldName: "variety",
       fieldPlaceHolder: "Enter crop variety",
       inputType: "text",
+      required: true
     },
     {
       fieldLabel: "Area of land utilized in acres",
       fieldName: "area",
       fieldPlaceHolder: "Enter area in acres",
       inputType: "number",
-      cutomRules: { max: 999, min: 1 }
+      cutomRules: { max: 999, min: 1 },
+      required: true
     },
     {
       fieldLabel: "Area measurement unit",
       fieldName: "areaUnit",
       fieldPlaceHolder: "Choose area measurement unit",
       fieldType: "select",
-      options: [
-        { label: "Acres", value: "acre" }
-      ],
+      options: () => { return [...unitHolder] },
+      required: true
     },
     {
       fieldLabel: "Crop status",
       fieldName: "cropStatus",
       fieldPlaceHolder: "Choose crop status",
       fieldType: "select",
-      options: [
-        { label: "Active", value: "active" },
-        { label: "Ready To Harvest", value: "ready_to_harvest" },
-        { label: "Harvested", value: "harvested" }
-      ],
+      options: () => {
+        return [
+          { label: "Active", value: "active" },
+          { label: "Ready To Harvest", value: "ready_to_harvest" },
+          { label: "Harvested", value: "harvested" }
+        ]
+      },
+      required: true
     },
     {
       fieldLabel: "Planting date",
       fieldName: "plantingDate",
       fieldPlaceHolder: "Choose your planting date",
       inputType: "date",
+      required: true
     },
     {
       fieldLabel: "Expected harvest date",
       fieldName: "expectedHarvestDate",
       fieldPlaceHolder: "Choose your expected harvest date",
       inputType: "date",
+      required: true
     },
   ]
 
@@ -99,7 +107,7 @@ export default function Crops() {
   }
 
   useEffect(() => {
-    getCrops()
+    getCrops();
   }, []);
 
   return (
