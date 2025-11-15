@@ -1,11 +1,11 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { 
-  Sprout, 
-  Beef, 
-  Package, 
-  DollarSign, 
+import {
+  Sprout,
+  Beef,
+  Package,
+  DollarSign,
   Home,
-  Tractor 
+  Tractor
 } from "lucide-react";
 
 import {
@@ -25,7 +25,6 @@ const menuItems = [
   { title: "Crops", url: "/crops", icon: Sprout },
   { title: "Livestock", url: "/livestock", icon: Beef },
   { title: "Inventory", url: "/inventory", icon: Package },
-  { title: "Financial", url: "/financial", icon: DollarSign },
 ];
 
 export function AppSidebar() {
@@ -34,8 +33,8 @@ export function AppSidebar() {
 
   const isActive = (path: string) => currentPath === path;
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
-    isActive 
-      ? "bg-primary/10 text-primary font-medium border-r-2 border-primary" 
+    isActive
+      ? "bg-p_rimary/10 text-primary font-medium border-r-2 border-primary"
       : "hover:bg-muted/50 text-muted-foreground hover:text-foreground";
 
   return (
@@ -60,7 +59,7 @@ export function AppSidebar() {
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild isActive={isActive(item.url)}>
                     <NavLink to={item.url} end className={getNavCls}>
                       <item.icon className="h-5 w-5" />
                       <span>{item.title}</span>

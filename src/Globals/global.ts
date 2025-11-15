@@ -35,7 +35,7 @@ export class CropCounter {
     getReadyToHarvestCrops(): number {
         let counter = 0;
         this.crops.map(crop => {
-            if(crop.cropStatus === "ready_to_harvest") counter ++;
+            if (crop.cropStatus === "ready_to_harvest") counter++;
         })
         return counter;
     }
@@ -43,7 +43,7 @@ export class CropCounter {
     getHarvestedCrops(): number {
         let counter = 0;
         this.crops.map(crop => {
-            if(crop.cropStatus === "harvested") counter ++;
+            if (crop.cropStatus === "harvested") counter++;
         })
         return counter;
     }

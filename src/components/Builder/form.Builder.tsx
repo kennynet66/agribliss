@@ -13,7 +13,7 @@ export type fieldDetail = {
     fieldPlaceHolder: string
     required?: boolean | true
     fieldType?: "input" | "select" | "date"
-    options?: { label: string; value: string }[]
+    options?: () => { label: string; value: string }[] | { label: string; value: string }[];
     cutomRules?: object
 }
 
@@ -21,11 +21,13 @@ interface FormBuilderProps {
     fields: fieldDetail[],
     submitUrl?: string
     buttonText?: string,
-    onSubmit?: SubmitHandler<FieldValues>
+    onSubmit?: SubmitHandler<FieldValues>,
+    formInstance?: ReturnType<typeof useForm>,
 }
-const FormBuilder: React.FC<FormBuilderProps> = ({ fields, buttonText = "Submit", onSubmit }) => {
-    const form = useForm();
-    const handleSubmit = async(values: FieldValues) => {
+const FormBuilder: React.FC<FormBuilderProps> = ({ fields, buttonText = "Submit", onSubmit, formInstance }) => {
+    const internalForm = useForm();
+    const form = formInstance || internalForm;
+    const handleSubmit = async (values: FieldValues) => {
         if (onSubmit) {
             onSubmit(values)
         } else {
@@ -37,9 +39,11 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ fields, buttonText = "Submit"
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(handleSubmit)}>
                     {fields.map((formField, index) => {
-                        if(!formField.fieldType)  return formField.fieldType = "input";
+                        if (!formField.fieldType) return formField.fieldType = "input";
                         return (
-                            <FormField key={formField.fieldName || index} name={formField.fieldName} render={({ field }) => (
+                            <FormField key={formField.fieldName || index} name={formField.fieldName} rules={{
+                                required: formField.required ? `${formField.fieldLabel} is required` : false
+                            }} render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>{formField.fieldLabel}</FormLabel>
                                     <FormControl>
@@ -49,25 +53,25 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ fields, buttonText = "Submit"
                                                     <SelectValue placeholder={formField.fieldPlaceHolder || "Select..."} />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    {formField.options?.map((opt) => (
+                                                    {formField.options?.().map((opt) => (
                                                         <SelectItem key={opt.value} value={opt.value}>
                                                             {opt.label}
                                                         </SelectItem>
                                                     ))}
                                                 </SelectContent>
                                             </Select>
-                                        ): formField.fieldType === "date" ? (
+                                        ) : formField.fieldType === "date" ? (
                                             <Calendar></Calendar>
-                                        ): (
-                                        <Input type={formField.inputType || "text"} placeholder={formField.fieldPlaceHolder} {...field} {...formField.cutomRules} />) }
+                                        ) : (
+                                            <Input type={formField.inputType || "text"} placeholder={formField.fieldPlaceHolder} {...field} {...formField.cutomRules} />)}
                                     </FormControl>
                                 </FormItem>
                             )} />
                         )
                     })}
-                <Button type="submit" className="bg-gradient-primary hover:bg-primary/90">
-                    {buttonText}
-                </Button>
+                    <Button type="submit" className="bg-gradient-primary hover:bg-primary/90">
+                        {buttonText}
+                    </Button>
                 </form>
             </Form>
         </>
