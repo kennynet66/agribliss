@@ -10,25 +10,34 @@ import {
   Wheat
 } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
-import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
 import { inventoryApi } from "@/apis/inventoryapi";
 import { TInventory } from "@/Types/inventoryTypes";
-import FormBuilder, { fieldDetail } from "@/components/Builder/form.Builder";
 import { alertService } from "@/Services/alert.Service";
 import { MeasurementUnits } from "@/Types/globaltypes";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DatePicker } from "@/components/ui/DatePicker";
 
 export default function Inventory() {
-  const form = useForm();
-  const category = form.watch("category");
   const [inventory, setInventory] = useState<TInventory[]>([]);
   const [lowStockItems, setLowStockItems] = useState<number>();
   const [totalInventoryItems, setTotalInventoryItems] = useState<number>();
   const [totalValue, setTotalValue] = useState<number>();
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const form = useForm({
+    defaultValues: {
+      itemName: "",
+      category: "",
+      unit: "",
+      purchaseDate: "",
+      value: "",
+      currentStock: 0
+    }
+  });
+  const category = form.watch("category");
 
   const getInventoryItems = async () => {
     const response = await inventoryApi.getInventoryItems();
@@ -69,65 +78,7 @@ export default function Inventory() {
     }
   };
 
-  const newInventoryItemFields: fieldDetail[] = [
-    {
-      fieldLabel: "Item name",
-      fieldName: 'itemName',
-      fieldPlaceHolder: "Enter item name",
-      required: true
-    },
-    {
-      fieldLabel: "Item category",
-      fieldName: 'category',
-      fieldPlaceHolder: "Choose the item's category",
-      fieldType: "select",
-      required: true,
-      options: () => {
-        return [
-          { label: "Supplies", value: "supplies" },
-          { label: "Equipment", value: "equipment" },
-          { label: "Seeds", value: "seeds" }
-        ]
-      }
-    },
-    {
-      fieldLabel: "Measurement unit",
-      fieldName: 'unit',
-      fieldPlaceHolder: "Choose the item's unit of measurement",
-      fieldType: "select",
-      required: true,
-      options: () => {
-        console.log("Called", category)
-        return getUnitsByCategory(category || '').map((item) => ({
-          label: item.key,
-          value: item.value
-        }))
-      }
-    },
-    {
-      fieldLabel: "Item purchase date",
-      fieldName: 'purchaseDate',
-      fieldPlaceHolder: "Choose item's purchase date",
-      inputType: "date",
-      required: true
-    },
-    {
-      fieldLabel: "Item value",
-      fieldName: 'value',
-      inputType: "number",
-      fieldPlaceHolder: "Enter item value",
-      required: true
-    },
-    {
-      fieldLabel: "Current stock",
-      fieldName: 'currentStock',
-      inputType: "number",
-      fieldPlaceHolder: "Number of items in stock",
-      required: true
-    },
-  ]
-
-  const handleCreateInventoryItem = async (inventoryItem: TInventory) => {
+  const handleCreateInventoryItem = async (inventoryItem) => {
     try {
       const response = await inventoryApi.createInventoryItem(inventoryItem);
       if (!response.Success) return alertService.show("Error", response.Message, "destructive");
@@ -158,7 +109,112 @@ export default function Inventory() {
             <DialogTitle>
               <h1>Add Item</h1>
             </DialogTitle>
-            <FormBuilder formInstance={form} fields={newInventoryItemFields} buttonText="Add Inventory Item" onSubmit={(values: TInventory) => handleCreateInventoryItem(values)} />
+            <Form {...form} >
+              <form onSubmit={form.handleSubmit(handleCreateInventoryItem)} className="space-y-2">
+                <FormField
+                  control={form.control}
+                  name="itemName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Item name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter item name" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Item category</FormLabel>
+                      <FormControl>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Choose the item's category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="supplies">Supplies</SelectItem>
+                            <SelectItem value="equipment">Equipment</SelectItem>
+                            <SelectItem value="seeds">Seeds</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="unit"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Measurement unit</FormLabel>
+                      <FormControl>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Choose the item's unit of measurement" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {getUnitsByCategory(category || "").map((item) => (
+                              <SelectItem key={item.key} value={item.key}>
+                                {item.value}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="purchaseDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Item purchase date</FormLabel>
+                      <FormControl>
+                        <DatePicker
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="value"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Item value</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="Enter item value" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="currentStock"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Current stock</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="Number of items in stock" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button type="submit">Save</Button>
+              </form>
+            </Form>
           </DialogContent>
         </Dialog>
       </div>
@@ -172,7 +228,7 @@ export default function Inventory() {
                 <Package className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{totalInventoryItems}</p>
+                <p className="text-2xl font-bold">{totalInventoryItems || 0}</p>
                 <p className="text-sm text-muted-foreground">Total Items</p>
               </div>
             </div>
@@ -186,7 +242,7 @@ export default function Inventory() {
                 <AlertTriangle className="h-6 w-6 text-destructive" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{lowStockItems}</p>
+                <p className="text-2xl font-bold">{lowStockItems || 0}</p>
                 <p className="text-sm text-muted-foreground">Low Stock Items</p>
               </div>
             </div>
@@ -200,7 +256,7 @@ export default function Inventory() {
                 <Package className="h-6 w-6 text-accent" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{totalValue}</p>
+                <p className="text-2xl font-bold">{totalValue || 0}</p>
                 <p className="text-sm text-muted-foreground">Total Value</p>
               </div>
             </div>
@@ -269,6 +325,22 @@ export default function Inventory() {
           );
         })}
       </div>
+
+      {inventory.length <= 0 && (
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <img
+            src="/empty_box.png"
+            alt="No items"
+            className="w-52 h-auto opacity-80 mb-6"
+          />
+          <h1 className="text-xl font-semibold text-muted-foreground">
+            No inventory items yet
+          </h1>
+          <p className="text-sm text-muted-foreground mt-2">
+            Items you add will appear here.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

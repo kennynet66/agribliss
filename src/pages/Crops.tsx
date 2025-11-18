@@ -10,17 +10,30 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { formatDate, CropCounter } from "@/Globals/global";
-import { Dialog, DialogClose, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useForm } from "react-hook-form";
-import FormBuilder, { fieldDetail } from "@/components/Builder/form.Builder";
 import { ICrop } from "@/Types/crop.types";
 import { cropApi } from "@/apis/crops";
 import { alertService } from "@/Services/alert.Service";
+import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/DatePicker";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function Crops() {
   const [crops, setCrops] = useState<ICrop[]>([]);
   const [isOpen, setIsOpen] = useState(false);
-  const form = useForm()
+  const form = useForm({
+    defaultValues: {
+      name: "",
+      variety: "",
+      area: 0,
+      areaUnit: "acre",
+      cropStatus: "",
+      plantingDate: "",
+      expectedHarvestDate: ""
+    }
+  })
   const count = new CropCounter(crops);
   const unitHolder: [{ label: string, value: string }] = [{ label: "fghgf", value: "ghgf" }];
 
@@ -29,67 +42,7 @@ export default function Crops() {
     setCrops(response.Crops)
   }
 
-  const newCropFields: fieldDetail[] = [
-    {
-      fieldLabel: "Crop name",
-      fieldName: "name",
-      fieldPlaceHolder: "Enter crop name",
-      required: true
-    },
-    {
-      fieldLabel: "Crop variety",
-      fieldName: "variety",
-      fieldPlaceHolder: "Enter crop variety",
-      inputType: "text",
-      required: true
-    },
-    {
-      fieldLabel: "Area of land utilized in acres",
-      fieldName: "area",
-      fieldPlaceHolder: "Enter area in acres",
-      inputType: "number",
-      cutomRules: { max: 999, min: 1 },
-      required: true
-    },
-    {
-      fieldLabel: "Area measurement unit",
-      fieldName: "areaUnit",
-      fieldPlaceHolder: "Choose area measurement unit",
-      fieldType: "select",
-      options: () => { return [...unitHolder] },
-      required: true
-    },
-    {
-      fieldLabel: "Crop status",
-      fieldName: "cropStatus",
-      fieldPlaceHolder: "Choose crop status",
-      fieldType: "select",
-      options: () => {
-        return [
-          { label: "Active", value: "active" },
-          { label: "Ready To Harvest", value: "ready_to_harvest" },
-          { label: "Harvested", value: "harvested" }
-        ]
-      },
-      required: true
-    },
-    {
-      fieldLabel: "Planting date",
-      fieldName: "plantingDate",
-      fieldPlaceHolder: "Choose your planting date",
-      inputType: "date",
-      required: true
-    },
-    {
-      fieldLabel: "Expected harvest date",
-      fieldName: "expectedHarvestDate",
-      fieldPlaceHolder: "Choose your expected harvest date",
-      inputType: "date",
-      required: true
-    },
-  ]
-
-  const handleCreateCrop = async (Crop: ICrop) => {
+  const handleCreateCrop = async (Crop) => {
     try {
       const response = await cropApi.createCrop(Crop)
       if (!response.Success) {
@@ -118,20 +71,82 @@ export default function Crops() {
           <p className="text-muted-foreground">Monitor your crops' health, growth stages, and yields</p>
         </div>
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-gradient-primary hover:bg-primary/90">
+              <Plus className="h-4 w-4 mr-2" />
+              Add crop
+            </Button>
+          </DialogTrigger>
           <DialogContent>
             <DialogTitle>
               <h1>Add New Crop</h1>
             </DialogTitle>
-            <FormBuilder fields={newCropFields} buttonText={"Add New Crop"} onSubmit={(values: ICrop) => handleCreateCrop(values)} />
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(handleCreateCrop)} className="space-y-2">
+                <FormField control={form.control} name="name" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Crop name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter crop name"  {...field} />
+                    </FormControl>
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="variety" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Crop variety</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter crop variety"  {...field} />
+                    </FormControl>
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="area" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Area of land utilized in acres</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="Enter area in acres"  {...field} />
+                    </FormControl>
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="cropStatus" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Crop status</FormLabel>
+                    <FormControl>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Choose the crop's current status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem key="active" value="active">Active</SelectItem>
+                          <SelectItem key="ready_to_harvest" value="ready_to_harvest">Ready to harvest</SelectItem>
+                          <SelectItem key="harvested" value="harvested">Harvested</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="plantingDate" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Planting date</FormLabel>
+                    <FormControl>
+                      <DatePicker value={field.value} onChange={field.onChange} />
+                    </FormControl>
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="expectedHarvestDate" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Expected harvest date</FormLabel>
+                    <FormControl>
+                      <DatePicker value={field.value} onChange={field.onChange} />
+                    </FormControl>
+                  </FormItem>
+                )} />
+                <Button type="submit">Save</Button>
+              </form>
+            </Form>
           </DialogContent>
           <DialogClose />
         </Dialog>
       </div>
-
-      <Button className="bg-gradient-primary hover:bg-primary/90" onClick={() => setIsOpen(!isOpen)}>
-        <Plus className="h-4 w-4 mr-2" />
-        Add New Crop
-      </Button>
 
       {/* Crop Overview Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -233,6 +248,21 @@ export default function Crops() {
           </Card>
         ))}
       </div>
+      {crops.length <= 0 && (
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <img
+            src="/empty_box.png"
+            alt="No items"
+            className="w-52 h-auto opacity-80 mb-6"
+          />
+          <h1 className="text-xl font-semibold text-muted-foreground">
+            No crops to show yet
+          </h1>
+          <p className="text-sm text-muted-foreground mt-2">
+            Crops you add will appear here.
+          </p>
+        </div>
+      )}
     </div>
   );
 }
